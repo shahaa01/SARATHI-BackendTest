@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { CalendarDays, CheckCircle, Star, CreditCard } from 'lucide-react';
+import ServiceIcon from '@/lib/serviceIcons';
 
 const CustomerDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -200,7 +201,9 @@ const CustomerDashboard: React.FC = () => {
               <div className="bg-gray-50 rounded-xl p-8 text-center">
                 <h4 className="font-medium text-lg mb-2">No upcoming bookings</h4>
                 <p className="text-gray-500 mb-4">You don't have any upcoming service bookings.</p>
-                <Button>Book a Service</Button>
+                <Button onClick={() => window.location.href = '/dashboard/services/book'}>
+                  Book a Service
+                </Button>
               </div>
             )}
           </div>
@@ -307,17 +310,37 @@ const CustomerDashboard: React.FC = () => {
                 <div 
                   key={service.id}
                   className="bg-gray-50 rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                  onClick={() => {
+                    // Redirect to service booking page with selected service
+                    window.location.href = `/dashboard/services/book?service=${service.name}`;
+                  }}
                 >
                   <div className="p-3 bg-primary bg-opacity-10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="h-6 w-6 text-primary" />
+                    <ServiceIcon name={service.name} className="h-6 w-6 text-primary" />
                   </div>
                   <p className="font-medium text-sm">{service.name}</p>
                 </div>
               ))}
             </div>
             
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <Button className="w-full py-6">Book New Service</Button>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col space-y-3">
+              <Button 
+                className="w-full py-6"
+                onClick={() => {
+                  window.location.href = '/dashboard/services/book';
+                }}
+              >
+                Book New Service
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  window.location.href = '/dashboard/services';
+                }}
+              >
+                View All Services
+              </Button>
             </div>
           </CardContent>
         </Card>

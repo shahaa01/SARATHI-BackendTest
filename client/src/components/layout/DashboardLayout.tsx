@@ -13,9 +13,9 @@ import {
   Bolt, 
   LogOut,
   Menu,
-  BellRing,
   ChevronRight
 } from 'lucide-react';
+import NotificationDropdown from '@/components/notifications/NotificationDropdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -167,14 +167,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-all relative">
-                  <BellRing className="h-6 w-6 text-gray-500" />
-                  <span className="absolute top-1 right-1 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                    2
-                  </span>
-                </button>
-              </div>
+              <NotificationDropdown />
               
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">

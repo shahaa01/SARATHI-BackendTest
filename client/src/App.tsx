@@ -19,6 +19,8 @@ import Reviews from "@/pages/dashboard/reviews/Reviews";
 import Settings from "@/pages/dashboard/settings/Settings";
 import Services from "@/pages/dashboard/provider/Services";
 import Availability from "@/pages/dashboard/provider/Availability";
+import ServicesPage from "@/pages/dashboard/services/ServicesPage";
+import BookingPage from "@/pages/dashboard/services/BookingPage";
 
 function Router() {
   return (
@@ -39,8 +41,12 @@ function Router() {
       <ProtectedRoute path="/dashboard/settings" component={Settings} />
       
       {/* Provider-specific Routes */}
-      <ProtectedRoute path="/dashboard/services" component={Services} requiredRole="provider" />
+      <ProtectedRoute path="/dashboard/provider/services" component={Services} requiredRole="provider" />
       <ProtectedRoute path="/dashboard/availability" component={Availability} requiredRole="provider" />
+      
+      {/* Customer Service Routes */}
+      <ProtectedRoute path="/dashboard/services" component={ServicesPage} requiredRole="customer" />
+      <ProtectedRoute path="/dashboard/services/book" component={BookingPage} requiredRole="customer" />
       
       {/* Fallback to 404 */}
       <Route path="*" component={NotFound} />
