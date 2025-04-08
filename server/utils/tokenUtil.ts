@@ -1,3 +1,7 @@
+/**
+ * Utility functions for token generation and management
+ * Used for email verification and password reset functionalities
+ */
 import crypto from 'crypto';
 
 /**
@@ -15,9 +19,9 @@ export function generateToken(length: number = 32): string {
  * @returns Date object representing the expiry time
  */
 export function getExpiryDate(hours: number = 24): Date {
-  const now = new Date();
-  now.setHours(now.getHours() + hours);
-  return now;
+  const expiryDate = new Date();
+  expiryDate.setHours(expiryDate.getHours() + hours);
+  return expiryDate;
 }
 
 /**
@@ -27,5 +31,5 @@ export function getExpiryDate(hours: number = 24): Date {
  */
 export function isTokenExpired(expiryDate: Date | null | undefined): boolean {
   if (!expiryDate) return true;
-  return new Date() > new Date(expiryDate);
+  return new Date() > expiryDate;
 }

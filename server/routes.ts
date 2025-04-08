@@ -61,6 +61,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/send-verification", verificationController.sendVerification);
   app.post("/api/reset-password/request", verificationController.requestPasswordReset);
   app.post("/api/reset-password", verificationController.resetPassword);
+  
+  // OTP verification routes
+  app.post("/api/register/send-otp", verificationController.sendRegistrationOTP);
+  app.post("/api/register/verify-otp", verificationController.verifyOTP);
+  app.post("/api/register/resend-otp", verificationController.resendOTP);
 
   const httpServer = createServer(app);
 

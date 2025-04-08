@@ -2,6 +2,9 @@ import {
   users,
   type User,
   type InsertUser,
+  tempUsers,
+  type TempUser,
+  type InsertTempUser,
   serviceProviderProfiles,
   type ServiceProviderProfile,
   type InsertServiceProviderProfile,
@@ -34,6 +37,13 @@ export interface IStorage {
   getUserByResetPasswordToken(token: string): Promise<User | undefined>;
   verifyUser(id: number): Promise<User | undefined>;
   
+  // Temporary User methods (for OTP verification)
+  createTempUser(userData: object, email: string, otp: string, otpExpiry: Date): Promise<TempUser>;
+  getTempUserByEmail(email: string): Promise<TempUser | undefined>;
+  updateTempUserOTP(id: number, otp: string, otpExpiry: Date): Promise<TempUser | undefined>;
+  incrementTempUserAttempts(id: number): Promise<TempUser | undefined>;
+  deleteTempUser(id: number): Promise<boolean>;
+  
   // Service Provider Profile methods
   getServiceProviderProfile(userId: number): Promise<ServiceProviderProfile | undefined>;
   createServiceProviderProfile(profile: InsertServiceProviderProfile): Promise<ServiceProviderProfile>;
@@ -63,12 +73,14 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private tempUsers: Map<number, TempUser>;
   private serviceProviderProfiles: Map<number, ServiceProviderProfile>;
   private serviceCategories: Map<number, ServiceCategory>;
   private bookings: Map<number, Booking>;
   private reviews: Map<number, Review>;
   
   private userCurrentId: number;
+  private tempUserCurrentId: number;
   private profileCurrentId: number;
   private categoryCurrentId: number;
   private bookingCurrentId: number;
@@ -80,6 +92,7 @@ export class MemStorage implements IStorage {
   constructor() {
     // Initialize maps
     this.users = new Map();
+    this.tempUsers = new Map();
     this.serviceProviderProfiles = new Map();
     this.serviceCategories = new Map();
     this.bookings = new Map();
@@ -87,6 +100,7 @@ export class MemStorage implements IStorage {
     
     // Initialize IDs
     this.userCurrentId = 1;
+    this.tempUserCurrentId = 1;
     this.profileCurrentId = 1;
     this.categoryCurrentId = 1;
     this.bookingCurrentId = 1;
@@ -196,6 +210,63 @@ export class MemStorage implements IStorage {
     
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  // Temporary User methods (for OTP verification)
+  async createTempUser(userData: object, email: string, otp: string, otpExpiry: Date): Promise<TempUser> {
+    const id = this.tempUserCurrentId++;
+    const createdAt = new Date();
+    
+    const tempUser: TempUser = {
+      id,
+      email,
+      otp,
+      otpExpiry,
+      userData,
+      attempts: 0,
+      createdAt
+    };
+    
+    this.tempUsers.set(id, tempUser);
+    return tempUser;
+  }
+  
+  async getTempUserByEmail(email: string): Promise<TempUser | undefined> {
+    return Array.from(this.tempUsers.values()).find(
+      (tempUser) => tempUser.email === email
+    );
+  }
+  
+  async updateTempUserOTP(id: number, otp: string, otpExpiry: Date): Promise<TempUser | undefined> {
+    const tempUser = this.tempUsers.get(id);
+    if (!tempUser) return undefined;
+    
+    const updatedTempUser = { 
+      ...tempUser, 
+      otp,
+      otpExpiry,
+      attempts: 0 // Reset attempts when new OTP is generated
+    };
+    
+    this.tempUsers.set(id, updatedTempUser);
+    return updatedTempUser;
+  }
+  
+  async incrementTempUserAttempts(id: number): Promise<TempUser | undefined> {
+    const tempUser = this.tempUsers.get(id);
+    if (!tempUser) return undefined;
+    
+    const updatedTempUser = { 
+      ...tempUser, 
+      attempts: (tempUser.attempts || 0) + 1
+    };
+    
+    this.tempUsers.set(id, updatedTempUser);
+    return updatedTempUser;
+  }
+  
+  async deleteTempUser(id: number): Promise<boolean> {
+    return this.tempUsers.delete(id);
   }
 
   // Service Provider Profile methods

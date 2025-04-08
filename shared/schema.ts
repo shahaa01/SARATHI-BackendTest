@@ -120,9 +120,27 @@ export const reviews = pgTable("reviews", {
 export const insertReviewSchema = createInsertSchema(reviews)
   .omit({ id: true, createdAt: true });
 
+// Temporary users for OTP verification
+export const tempUsers = pgTable("temp_users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  otp: text("otp").notNull(),
+  otpExpiry: timestamp("otp_expiry").notNull(),
+  userData: jsonb("user_data").notNull(), // Stores all user registration data
+  attempts: integer("attempts").default(0), // Tracks failed OTP attempts
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schema for creating a temporary user
+export const insertTempUserSchema = createInsertSchema(tempUsers)
+  .omit({ id: true, createdAt: true });
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type TempUser = typeof tempUsers.$inferSelect;
+export type InsertTempUser = z.infer<typeof insertTempUserSchema>;
 
 export type ServiceProviderProfile = typeof serviceProviderProfiles.$inferSelect;
 export type InsertServiceProviderProfile = z.infer<typeof insertServiceProviderProfileSchema>;
