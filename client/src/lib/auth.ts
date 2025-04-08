@@ -23,8 +23,26 @@ export const loginSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
-// Registration schema - reuse from shared schema with validation
-export const registerSchema = validateUserSchema;
+// Registration schema - explicitly define all fields to prevent TypeScript issues
+export const registerSchema = z.object({
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  firstName: z.string().min(1, { message: "First name is required" }),
+  lastName: z.string().min(1, { message: "Last name is required" }),
+  role: z.string().default("customer"),
+  // Optional fields with proper string handling
+  phone: z.string().optional().nullable().transform(val => val || ''),
+  address: z.string().optional().nullable().transform(val => val || ''),
+  city: z.string().default("Kathmandu").optional().nullable().transform(val => val || 'Kathmandu'),
+  profileImageUrl: z.string().optional().nullable().transform(val => val || ''),
+  confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }).optional(),
+}).refine(
+  (data) => !data.confirmPassword || data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  }
+);
 
 // Auth Context
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -126,4 +144,15 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+}
+
+// Custom hooks for login and registration
+export function useLogin() {
+  const { loginMutation } = useAuth();
+  return loginMutation;
+}
+
+export function useRegister() {
+  const { registerMutation } = useAuth();
+  return registerMutation;
 }

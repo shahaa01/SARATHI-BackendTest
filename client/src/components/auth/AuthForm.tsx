@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useLogin, useRegister, loginSchema, registerSchema } from '@/lib/auth';
+import { useAuth, loginSchema, registerSchema } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -18,59 +18,102 @@ interface AuthFormProps {
 export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const login = useLogin();
-  const register = useRegister();
+  const { loginMutation, registerMutation } = useAuth();
 
+  // Explicitly create types for both form schemas to help TypeScript
+  type LoginFormValues = z.infer<typeof loginSchema>;
+  type RegisterFormValues = z.infer<typeof registerSchema>;
+  
   // Determine which schema to use based on form type
   const schema = type === 'login' ? loginSchema : registerSchema;
   
-  // Set up form
+  // Set up form with persistent values
+  const defaultRegisterValues = {
+    username: '', 
+    password: '', 
+    confirmPassword: '', 
+    email: '', 
+    firstName: '', 
+    lastName: '', 
+    role: 'customer',
+    phone: '' as string,  // Type assertion to help TypeScript understand these can't be null
+    address: '' as string,
+    city: 'Kathmandu',
+    profileImageUrl: '' as string,
+  };
+  
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: type === 'login' 
       ? { username: '', password: '' } 
-      : { 
-          username: '', 
-          password: '', 
-          confirmPassword: '', 
-          email: '', 
-          firstName: '', 
-          lastName: '', 
-          role: 'customer',
-          phone: '',
-          address: '',
-          city: 'Kathmandu',
-        },
+      : defaultRegisterValues,
+    mode: 'onChange', // Validate field on change
   });
 
-  // Handle form submission
-  const onSubmit = async (values: z.infer<typeof schema>) => {
+  // Handle form submission with type-safe handling
+  const onSubmit = async (values: LoginFormValues | RegisterFormValues) => {
     try {
       if (type === 'login') {
-        await login.mutateAsync(values);
-        toast({
-          title: "Login successful",
-          description: "Welcome back to Sarathi!",
+        // Safe to cast to LoginFormValues when in login mode
+        const loginValues = values as LoginFormValues;
+        
+        // Just pass username and password for login
+        await loginMutation.mutateAsync({
+          username: loginValues.username,
+          password: loginValues.password
         });
         setLocation('/dashboard');
       } else {
-        await register.mutateAsync(values);
-        toast({
-          title: "Registration successful",
-          description: "Welcome to Sarathi!",
-        });
-        setLocation('/dashboard');
+        // Safe to cast to RegisterFormValues when in register mode
+        const registerValues = values as RegisterFormValues;
+        
+        // For debugging - log registration data
+        console.log("Registration data:", registerValues);
+        
+        // Convert form values to the expected format for registration
+        const registerData = {
+          username: registerValues.username,
+          password: registerValues.password,
+          email: registerValues.email,
+          firstName: registerValues.firstName, 
+          lastName: registerValues.lastName,
+          role: registerValues.role || 'customer',
+          // Optional fields - pass as empty string if null/undefined
+          phone: registerValues.phone || '',
+          address: registerValues.address || '',
+          city: registerValues.city || 'Kathmandu',
+          profileImageUrl: '',
+          confirmPassword: registerValues.confirmPassword
+        };
+        
+        try {
+          await registerMutation.mutateAsync(registerData);
+          toast({
+            title: "Registration successful",
+            description: "Welcome to Sarathi!"
+          });
+          // Only redirect on success
+          setLocation('/dashboard');
+        } catch (error) {
+          // On error, form values are preserved, don't reset the form
+          toast({
+            title: "Registration failed",
+            description: error instanceof Error ? error.message : "An unknown error occurred",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
+      // This catch block is for login errors or unexpected issues
       toast({
-        title: type === 'login' ? "Login failed" : "Registration failed",
+        title: type === 'login' ? "Login failed" : "Registration error",
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
   };
 
-  const isLoading = login.isPending || register.isPending;
+  const isLoading = loginMutation.isPending || registerMutation.isPending;
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -153,7 +196,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="+977 9812345678" {...field} />
+                        <Input 
+                          placeholder="+977 9812345678" 
+                          {...field} 
+                          value={field.value || ''} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -167,7 +214,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="123 Main St" {...field} />
+                        <Input 
+                          placeholder="123 Main St" 
+                          {...field} 
+                          value={field.value || ''} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
