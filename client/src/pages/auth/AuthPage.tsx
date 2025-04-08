@@ -118,6 +118,7 @@ const AuthPage = () => {
         username: "",
         email: "",
         password: "",
+        confirmPassword: "",
         firstName: "",
         lastName: "",
         role: "customer",
@@ -129,6 +130,8 @@ const AuthPage = () => {
     });
 
     const onSubmit = (values: z.infer<typeof registerSchema>) => {
+      // Log form data to verify values
+      console.log("Registration data:", values);
       registerMutation.mutate(values);
     };
 
@@ -195,6 +198,19 @@ const AuthPage = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="********" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
                   <Input type="password" placeholder="********" {...field} />
                 </FormControl>

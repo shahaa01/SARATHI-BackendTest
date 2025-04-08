@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useContext } from "react";
 import { useQuery, useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { insertUserSchema, User as SelectUser, InsertUser } from '@shared/schema';
+import { insertUserSchema, validateUserSchema, User as SelectUser, InsertUser } from '@shared/schema';
 import { apiRequest, getQueryFn } from "./queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,8 +23,8 @@ export const loginSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
-// Registration schema - reuse from shared schema
-export const registerSchema = insertUserSchema;
+// Registration schema - reuse from shared schema with validation
+export const registerSchema = validateUserSchema;
 
 // Auth Context
 export const AuthContext = createContext<AuthContextType | null>(null);

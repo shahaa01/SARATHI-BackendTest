@@ -21,13 +21,18 @@ export const users = pgTable("users", {
 // Schema for creating a new user
 export const insertUserSchema = createInsertSchema(users)
   .omit({ id: true, createdAt: true })
+  .partial({ phone: true, address: true, city: true, profileImageUrl: true })
   .extend({
-    confirmPassword: z.string().min(6),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
+    confirmPassword: z.string().min(6).optional(),
+  });
+
+// Add validation for password matching only when both fields are present
+export const validateUserSchema = insertUserSchema.refine(
+  (data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  });
+  }
+);
 
 // Service provider profile with additional details
 export const serviceProviderProfiles = pgTable("service_provider_profiles", {
