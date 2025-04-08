@@ -18,11 +18,21 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { loginSchema, registerSchema } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import OTPVerification from "@/components/auth/OTPVerification";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const AuthPage = () => {
-  const { user, isLoading, loginMutation, registerMutation } = useAuth();
+  const { user, isLoading, loginMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  
+  // OTP verification states
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [isRequestingOTP, setIsRequestingOTP] = useState(false);
+  const [tempUserId, setTempUserId] = useState<number | null>(null);
+  const [registrationData, setRegistrationData] = useState<any>(null);
   
   // Parse URL parameters to determine initial active tab and role
   useEffect(() => {
@@ -122,17 +132,63 @@ const AuthPage = () => {
         firstName: "",
         lastName: "",
         role: "customer",
-        phone: null,
-        address: null,
-        city: null,
-        profileImageUrl: null,
+        phone: "",
+        address: "",
+        city: "Kathmandu",
+        profileImageUrl: "",
       },
     });
 
-    const onSubmit = (values: z.infer<typeof registerSchema>) => {
+    const onSubmit = async (values: z.infer<typeof registerSchema>) => {
       // Log form data to verify values
       console.log("Registration data:", values);
-      registerMutation.mutate(values);
+      
+      // Create registration data object
+      const registerData = {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        role: values.role,
+        phone: values.phone || '',
+        address: values.address || '',
+        city: values.city || 'Kathmandu',
+        profileImageUrl: '',
+        confirmPassword: values.confirmPassword
+      };
+      
+      try {
+        setIsRequestingOTP(true);
+        // Instead of directly registering, initiate the OTP flow
+        const res = await apiRequest('POST', '/api/register/send-otp', registerData);
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to initiate registration');
+        }
+        
+        const data = await res.json();
+        // Store the temporary user ID and registration data
+        setTempUserId(data.tempUserId);
+        setRegistrationData(registerData);
+        
+        // Show OTP verification component
+        setShowOTPVerification(true);
+        
+        toast({
+          title: "Verification required",
+          description: `We've sent a verification code to ${registerData.email}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Registration failed",
+          description: error instanceof Error ? error.message : "An unknown error occurred",
+          variant: "destructive",
+        });
+      } finally {
+        setIsRequestingOTP(false);
+      }
     };
 
     return (
@@ -249,12 +305,12 @@ const AuthPage = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={registerMutation.isPending}
+            disabled={isRequestingOTP}
           >
-            {registerMutation.isPending ? (
+            {isRequestingOTP ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Account...
+                Sending Verification Code...
               </>
             ) : (
               "Create Account"
@@ -265,36 +321,65 @@ const AuthPage = () => {
     );
   };
 
+  // Handle successful OTP verification
+  const handleVerificationSuccess = (user: any) => {
+    // Set user data in the React Query cache
+    queryClient.setQueryData(["/api/user"], user);
+    
+    toast({
+      title: "Registration successful",
+      description: `Welcome to Sarathi, ${user.firstName}!`
+    });
+    
+    // Redirect to dashboard
+    setLocation('/dashboard');
+  };
+
+  // Handle going back from OTP verification to the registration form
+  const handleBackToRegistration = () => {
+    setShowOTPVerification(false);
+  };
+
   return (
     <div className="flex min-h-screen">
-      {/* Left side - Login/Register Forms */}
+      {/* Left side - Login/Register/OTP Forms */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md p-8">
-          <Tabs defaultValue="login" onValueChange={(value) => setActiveTab(value as "login" | "register")}>
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <div className="space-y-4">
-                <div className="text-center mb-6">
-                  <h1 className="text-2xl font-bold">Welcome Back</h1>
-                  <p className="text-muted-foreground">Sign in to access your Sarathi account</p>
+        {showOTPVerification && tempUserId && registrationData ? (
+          <OTPVerification
+            email={registrationData.email}
+            tempUserId={tempUserId}
+            userData={registrationData}
+            onVerificationSuccess={handleVerificationSuccess}
+            onBack={handleBackToRegistration}
+          />
+        ) : (
+          <Card className="w-full max-w-md p-8">
+            <Tabs defaultValue="login" onValueChange={(value) => setActiveTab(value as "login" | "register")}>
+              <TabsList className="grid w-full grid-cols-2 mb-8">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <h1 className="text-2xl font-bold">Welcome Back</h1>
+                    <p className="text-muted-foreground">Sign in to access your Sarathi account</p>
+                  </div>
+                  <LoginForm />
                 </div>
-                <LoginForm />
-              </div>
-            </TabsContent>
-            <TabsContent value="register">
-              <div className="space-y-4">
-                <div className="text-center mb-6">
-                  <h1 className="text-2xl font-bold">Create Your Account</h1>
-                  <p className="text-muted-foreground">Join Sarathi to connect with service providers</p>
+              </TabsContent>
+              <TabsContent value="register">
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <h1 className="text-2xl font-bold">Create Your Account</h1>
+                    <p className="text-muted-foreground">Join Sarathi to connect with service providers</p>
+                  </div>
+                  <RegisterForm />
                 </div>
-                <RegisterForm />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </Card>
+              </TabsContent>
+            </Tabs>
+          </Card>
+        )}
       </div>
 
       {/* Right side - Hero Section */}
