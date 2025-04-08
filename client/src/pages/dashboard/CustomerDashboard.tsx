@@ -55,8 +55,8 @@ const CustomerDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/bookings">
-                  <a className="text-primary text-sm font-medium hover:underline">View all bookings</a>
+                <Link href="/dashboard/bookings" className="text-primary text-sm font-medium hover:underline">
+                  View all bookings
                 </Link>
               </div>
             </CardContent>
@@ -75,8 +75,8 @@ const CustomerDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/bookings?filter=completed">
-                  <a className="text-primary text-sm font-medium hover:underline">View history</a>
+                <Link href="/dashboard/bookings?filter=completed" className="text-primary text-sm font-medium hover:underline">
+                  View history
                 </Link>
               </div>
             </CardContent>
@@ -95,8 +95,8 @@ const CustomerDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/reviews">
-                  <a className="text-primary text-sm font-medium hover:underline">Leave a review</a>
+                <Link href="/dashboard/reviews" className="text-primary text-sm font-medium hover:underline">
+                  Leave a review
                 </Link>
               </div>
             </CardContent>
@@ -115,8 +115,8 @@ const CustomerDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/bookings">
-                  <a className="text-primary text-sm font-medium hover:underline">View expenses</a>
+                <Link href="/dashboard/bookings" className="text-primary text-sm font-medium hover:underline">
+                  View expenses
                 </Link>
               </div>
             </CardContent>
@@ -127,8 +127,8 @@ const CustomerDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Upcoming Bookings</h3>
-            <Link href="/dashboard/bookings">
-              <a className="text-primary font-medium hover:underline text-sm">View all</a>
+            <Link href="/dashboard/bookings" className="text-primary font-medium hover:underline text-sm">
+              View all
             </Link>
           </div>
           
@@ -145,7 +145,7 @@ const CustomerDashboard: React.FC = () => {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div className="flex items-start space-x-4">
                         <div className="p-3 bg-primary bg-opacity-10 rounded-xl">
-                          <booking.icon className="h-8 w-8 text-primary" />
+                          <CalendarDays className="h-8 w-8 text-primary" />
                         </div>
                         
                         <div>
@@ -210,8 +210,8 @@ const CustomerDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Recent Services</h3>
-            <Link href="/dashboard/bookings?filter=completed">
-              <a className="text-primary font-medium hover:underline text-sm">View all history</a>
+            <Link href="/dashboard/bookings?filter=completed" className="text-primary font-medium hover:underline text-sm">
+              View all history
             </Link>
           </div>
           
@@ -242,7 +242,7 @@ const CustomerDashboard: React.FC = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="p-2 bg-primary bg-opacity-10 rounded-lg mr-3">
-                              <service.icon className="h-5 w-5 text-primary" />
+                              <CheckCircle className="h-5 w-5 text-primary" />
                             </div>
                             <span className="font-medium">{service.serviceType}</span>
                           </div>
@@ -309,7 +309,7 @@ const CustomerDashboard: React.FC = () => {
                   className="bg-gray-50 rounded-xl p-4 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                 >
                   <div className="p-3 bg-primary bg-opacity-10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                    <service.icon className="h-6 w-6 text-primary" />
+                    <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
                   <p className="font-medium text-sm">{service.name}</p>
                 </div>
