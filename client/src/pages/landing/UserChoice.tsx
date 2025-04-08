@@ -27,22 +27,18 @@ const UserChoice: React.FC = () => {
 
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 flex flex-col justify-center items-center">
         <div className="user-choice w-full">
-          <Link href="/register?role=customer">
-            <a className="user flex items-center justify-center w-4/5 mx-auto h-12 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-lg mb-4 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              Join as Customer
-            </a>
+          <Link href="/auth?tab=register&role=customer" className="user flex items-center justify-center w-4/5 mx-auto h-12 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-lg mb-4 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            Join as Customer
           </Link>
           
-          <Link href="/register?role=provider">
-            <a className="sarathi flex items-center justify-center w-4/5 mx-auto h-12 bg-gray-100 text-gray-800 hover:bg-[#0B6A50] hover:text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-              Join as Service Provider
-            </a>
+          <Link href="/auth?tab=register&role=provider" className="sarathi flex items-center justify-center w-4/5 mx-auto h-12 bg-gray-100 text-gray-800 hover:bg-[#0B6A50] hover:text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+            Join as Service Provider
           </Link>
           
           <div className="mt-8 text-center">
             <p className="text-gray-600 mb-2">Already have an account?</p>
-            <Link href="/login">
-              <a className="text-primary font-medium hover:underline">Login Here</a>
+            <Link href="/auth?tab=login" className="text-primary font-medium hover:underline">
+              Login Here
             </Link>
           </div>
         </div>

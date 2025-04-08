@@ -87,17 +87,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </p>
             
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={`flex items-center px-4 py-3 rounded-lg ${
-                    isActive(item.path)
-                      ? 'bg-primary bg-opacity-10 text-primary'
-                      : 'text-gray-700 hover:bg-gray-100 transition-all'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </a>
+              <Link 
+                key={item.path} 
+                href={item.path}
+                className={`flex items-center px-4 py-3 rounded-lg ${
+                  isActive(item.path)
+                    ? 'bg-primary bg-opacity-10 text-primary'
+                    : 'text-gray-700 hover:bg-gray-100 transition-all'
+                }`}
+              >
+                {item.icon}
+                {item.label}
               </Link>
             ))}
           </div>
@@ -117,32 +117,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Mobile navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg z-30 border-t">
         <div className="flex justify-around items-center">
-          <Link href="/dashboard">
-            <a className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard') ? 'text-primary' : 'text-gray-500'}`}>
-              <Home className="h-6 w-6" />
-              <span className="text-xs mt-1">Home</span>
-            </a>
+          <Link 
+            href="/dashboard"
+            className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard') ? 'text-primary' : 'text-gray-500'}`}
+          >
+            <Home className="h-6 w-6" />
+            <span className="text-xs mt-1">Home</span>
           </Link>
           
-          <Link href="/dashboard/bookings">
-            <a className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/bookings') ? 'text-primary' : 'text-gray-500'}`}>
-              <CalendarDays className="h-6 w-6" />
-              <span className="text-xs mt-1">Bookings</span>
-            </a>
+          <Link 
+            href="/dashboard/bookings"
+            className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/bookings') ? 'text-primary' : 'text-gray-500'}`}
+          >
+            <CalendarDays className="h-6 w-6" />
+            <span className="text-xs mt-1">Bookings</span>
           </Link>
           
-          <Link href="/dashboard/reviews">
-            <a className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/reviews') ? 'text-primary' : 'text-gray-500'}`}>
-              <Star className="h-6 w-6" />
-              <span className="text-xs mt-1">Reviews</span>
-            </a>
+          <Link 
+            href="/dashboard/reviews"
+            className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/reviews') ? 'text-primary' : 'text-gray-500'}`}
+          >
+            <Star className="h-6 w-6" />
+            <span className="text-xs mt-1">Reviews</span>
           </Link>
           
-          <Link href="/dashboard/settings">
-            <a className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/settings') ? 'text-primary' : 'text-gray-500'}`}>
-              <Settings className="h-6 w-6" />
-              <span className="text-xs mt-1">Settings</span>
-            </a>
+          <Link 
+            href="/dashboard/settings"
+            className={`flex flex-col items-center py-2 px-3 ${isActive('/dashboard/settings') ? 'text-primary' : 'text-gray-500'}`}
+          >
+            <Settings className="h-6 w-6" />
+            <span className="text-xs mt-1">Settings</span>
           </Link>
         </div>
       </div>
@@ -201,15 +205,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </div>
               <nav className="p-4">
                 {navItems.map((item) => (
-                  <Link key={item.path} href={item.path}>
-                    <a className={`flex items-center px-4 py-3 rounded-lg mb-2 ${
+                  <Link 
+                    key={item.path} 
+                    href={item.path}
+                    className={`flex items-center px-4 py-3 rounded-lg mb-2 ${
                       isActive(item.path)
                         ? 'bg-primary bg-opacity-10 text-primary'
                         : 'text-gray-700 hover:bg-gray-100 transition-all'
-                    }`}>
-                      {item.icon}
-                      {item.label}
-                    </a>
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
                   </Link>
                 ))}
                 <div className="mt-4 pt-4 border-t border-gray-100">

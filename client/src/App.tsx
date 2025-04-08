@@ -8,7 +8,7 @@ import { AuthProvider } from "@/lib/auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 
 // Auth Pages
-import AuthPage from "@/pages/auth/AuthPage";
+import AuthPage from "@/pages/auth";
 import UserChoice from "@/pages/landing/UserChoice";
 
 // Dashboard Pages

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { Redirect } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,28 @@ import { Loader2 } from "lucide-react";
 const AuthPage = () => {
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const [location] = useLocation();
+  
+  // Parse URL parameters to determine initial active tab and role
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1]);
+    const tab = params.get('tab');
+    const role = params.get('role');
+    
+    if (tab === 'login' || tab === 'register') {
+      setActiveTab(tab);
+    }
+    
+    if (role && activeTab === 'register') {
+      const registerForm = document.querySelector('form[name="register-form"]');
+      if (registerForm) {
+        const roleInput = registerForm.querySelector('input[name="role"]');
+        if (roleInput) {
+          (roleInput as HTMLInputElement).value = role;
+        }
+      }
+    }
+  }, [location]);
 
   // Redirect if user is already logged in
   if (user) {
