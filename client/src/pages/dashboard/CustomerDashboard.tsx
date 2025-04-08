@@ -3,13 +3,13 @@ import { Link } from 'wouter';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { CalendarDays, CheckCircle, Star, CreditCard } from 'lucide-react';
 
 const CustomerDashboard: React.FC = () => {
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
   
   // Fetch customer dashboard data
   const { data: dashboardData, isLoading } = useQuery({

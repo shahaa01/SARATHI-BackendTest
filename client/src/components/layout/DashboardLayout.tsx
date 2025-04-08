@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { useCurrentUser, useLogout } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { 
@@ -23,8 +23,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [location, setLocation] = useLocation();
-  const { data: user } = useCurrentUser();
-  const logout = useLogout();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,12 +35,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      await logout.mutateAsync();
-      toast({
-        title: "Logged out successfully",
-        description: "See you again soon!",
-      });
-      setLocation('/login');
+      await logoutMutation.mutateAsync();
+      setLocation('/auth');
     } catch (error) {
       toast({
         title: "Logout failed",

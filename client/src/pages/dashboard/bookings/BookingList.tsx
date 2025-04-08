@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useCurrentUser } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +35,7 @@ import {
 const BookingList: React.FC = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
   const [location] = useLocation();
   
   // Get URL params

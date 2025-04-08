@@ -4,10 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { AuthProvider } from "@/lib/auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 // Auth Pages
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
+import AuthPage from "@/pages/auth/AuthPage";
 import UserChoice from "@/pages/landing/UserChoice";
 
 // Dashboard Pages
@@ -18,68 +19,26 @@ import Reviews from "@/pages/dashboard/reviews/Reviews";
 import Services from "@/pages/dashboard/provider/Services";
 import Availability from "@/pages/dashboard/provider/Availability";
 
-// Protected Route
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-
 function Router() {
   return (
     <Switch>
       {/* Public Routes */}
       <Route path="/" component={UserChoice} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
+      <Route path="/auth" component={AuthPage} />
       
       {/* Customer Dashboard Routes */}
-      <Route path="/dashboard">
-        {(params) => (
-          <ProtectedRoute>
-            <CustomerDashboard />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <ProtectedRoute path="/dashboard" component={CustomerDashboard} />
       
       {/* Provider Dashboard Routes */}
-      <Route path="/dashboard/provider">
-        {(params) => (
-          <ProtectedRoute requiredRole="provider">
-            <ProviderDashboard />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <ProtectedRoute path="/dashboard/provider" component={ProviderDashboard} />
       
       {/* Shared Dashboard Routes */}
-      <Route path="/dashboard/bookings">
-        {(params) => (
-          <ProtectedRoute>
-            <BookingList />
-          </ProtectedRoute>
-        )}
-      </Route>
-      
-      <Route path="/dashboard/reviews">
-        {(params) => (
-          <ProtectedRoute>
-            <Reviews />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <ProtectedRoute path="/dashboard/bookings" component={BookingList} />
+      <ProtectedRoute path="/dashboard/reviews" component={Reviews} />
       
       {/* Provider-specific Routes */}
-      <Route path="/dashboard/services">
-        {(params) => (
-          <ProtectedRoute requiredRole="provider">
-            <Services />
-          </ProtectedRoute>
-        )}
-      </Route>
-      
-      <Route path="/dashboard/availability">
-        {(params) => (
-          <ProtectedRoute requiredRole="provider">
-            <Availability />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <ProtectedRoute path="/dashboard/services" component={Services} />
+      <ProtectedRoute path="/dashboard/availability" component={Availability} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
@@ -91,8 +50,10 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="light">
       <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

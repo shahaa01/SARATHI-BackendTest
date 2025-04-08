@@ -1,6 +1,7 @@
 import React from 'react';
 import { Redirect } from 'wouter';
-import { useCurrentUser } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,20 +12,20 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requiredRole = null 
 }) => {
-  const { data: user, isLoading } = useCurrentUser();
+  const { user, isLoading } = useAuth();
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary border-r-2 border-b-2 border-gray-200"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   // If not authenticated, redirect to login
   if (!user) {
-    return <Redirect to="/login" />;
+    return <Redirect to="/auth" />;
   }
 
   // If role is required, check user's role

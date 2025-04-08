@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import {
@@ -21,7 +21,7 @@ import {
 import { Select } from '@/components/ui/select';
 
 const ProviderDashboard: React.FC = () => {
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
   const [chartPeriod, setChartPeriod] = useState('week');
   
   // Fetch provider dashboard data

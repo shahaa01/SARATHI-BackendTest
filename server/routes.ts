@@ -2,20 +2,21 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authMiddleware } from "./middleware/auth";
+import { setupAuth } from "./auth";
+import cookieParser from "cookie-parser";
 
 // Import controllers
-import * as authController from "./controllers/authController";
 import * as bookingController from "./controllers/bookingController";
 import * as userController from "./controllers/userController";
 import * as serviceController from "./controllers/serviceController";
 import * as reviewController from "./controllers/reviewController";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth routes
-  app.post("/api/auth/register", authController.register);
-  app.post("/api/auth/login", authController.login);
-  app.post("/api/auth/logout", authController.logout);
-  app.get("/api/auth/me", authMiddleware, authController.getCurrentUser);
+  // Add cookie parser middleware
+  app.use(cookieParser());
+  
+  // Set up authentication
+  setupAuth(app);
 
   // Dashboard routes
   app.get("/api/dashboard/customer", authMiddleware, userController.getCustomerDashboard);
