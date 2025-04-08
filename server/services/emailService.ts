@@ -11,7 +11,7 @@ if (sendgridApiKey) {
   mailService.setApiKey(sendgridApiKey);
 }
 
-const FROM_EMAIL = 'noreply@sarathi.com';
+const FROM_EMAIL = 'sarathisewa2081@gmail.com';
 const APP_NAME = 'Sarathi';
 const BASE_URL = process.env.APP_URL || 'http://localhost:3000';
 
