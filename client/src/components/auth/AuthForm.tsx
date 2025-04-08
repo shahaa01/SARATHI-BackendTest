@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth, loginSchema, registerSchema } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import OTPVerification from './OTPVerification';
+import { Loader2 } from 'lucide-react';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -19,6 +22,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { loginMutation, registerMutation } = useAuth();
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [isRequestingOTP, setIsRequestingOTP] = useState(false);
+  const [tempUserId, setTempUserId] = useState<number | null>(null);
+  const [registrationData, setRegistrationData] = useState<any>(null);
 
   // Explicitly create types for both form schemas to help TypeScript
   type LoginFormValues = z.infer<typeof loginSchema>;
@@ -50,6 +57,25 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     mode: 'onChange', // Validate field on change
   });
 
+  // Handle successful OTP verification
+  const handleVerificationSuccess = (user: any) => {
+    // Set user data in the React Query cache
+    queryClient.setQueryData(["/api/user"], user);
+    
+    toast({
+      title: "Registration successful",
+      description: `Welcome to Sarathi, ${user.firstName}!`
+    });
+    
+    // Redirect to dashboard
+    setLocation('/dashboard');
+  };
+
+  // Handle going back from OTP verification to the registration form
+  const handleBackToRegistration = () => {
+    setShowOTPVerification(false);
+  };
+
   // Handle form submission with more robust error handling
   const onSubmit = async (values: LoginFormValues | RegisterFormValues) => {
     // No outer try/catch - handle errors in each specific form submission block
@@ -79,9 +105,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
       // Safe to cast to RegisterFormValues when in register mode
       const registerValues = values as RegisterFormValues;
       
-      // For debugging - log registration data
-      console.log("Registration data:", registerValues);
-      
       // Convert form values to the expected format for registration
       const registerData = {
         username: registerValues.username,
@@ -99,29 +122,53 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
       };
       
       try {
-        // Set a flag to indicate that registration is in progress, but don't reset the form
-        const result = await registerMutation.mutateAsync(registerData);
-        // Only toast and redirect if we successfully registered
-        if (result) {
-          toast({
-            title: "Registration successful",
-            description: "Welcome to Sarathi!"
-          });
-          // Only redirect on success
-          setLocation('/dashboard');
+        setIsRequestingOTP(true);
+        // Instead of directly registering, initiate the OTP flow
+        const res = await apiRequest('POST', '/api/register/send-otp', registerData);
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to initiate registration');
         }
+        
+        const data = await res.json();
+        // Store the temporary user ID and registration data
+        setTempUserId(data.tempUserId);
+        setRegistrationData(registerData);
+        
+        // Show OTP verification component
+        setShowOTPVerification(true);
+        
+        toast({
+          title: "Verification required",
+          description: `We've sent a verification code to ${registerData.email}`,
+        });
       } catch (error) {
-        // On error, form values are preserved, don't reset the form
         toast({
           title: "Registration failed",
           description: error instanceof Error ? error.message : "An unknown error occurred",
           variant: "destructive",
         });
+      } finally {
+        setIsRequestingOTP(false);
       }
     }
   };
 
-  const isLoading = loginMutation.isPending || registerMutation.isPending;
+  const isLoading = loginMutation.isPending || registerMutation.isPending || isRequestingOTP;
+
+  // If showing OTP verification, render that component instead of the form
+  if (showOTPVerification && tempUserId && registrationData) {
+    return (
+      <OTPVerification
+        email={registrationData.email}
+        tempUserId={tempUserId}
+        userData={registrationData}
+        onVerificationSuccess={handleVerificationSuccess}
+        onBack={handleBackToRegistration}
+      />
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -297,11 +344,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
             >
               {isLoading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isRequestingOTP ? 'Sending verification code...' : 'Processing...'}
                 </span>
               ) : (
                 type === 'login' ? 'Sign in' : 'Create account'
