@@ -77,56 +77,13 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Authentication routes
-  app.post("/api/register", async (req, res, next) => {
-    try {
-      const existingUser = await storage.getUserByUsername(req.body.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const existingEmail = await storage.getUserByEmail(req.body.email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already exists" });
-      }
-
-      // Hash password and create user
-      const user = await storage.createUser({
-        ...req.body,
-        password: await hashPassword(req.body.password),
-      });
-
-      // Create service provider profile if role is provider
-      if (user.role === 'provider') {
-        await storage.createServiceProviderProfile({
-          userId: user.id,
-          bio: '',
-          experience: 0,
-          hourlyRate: 0,
-          servicesOffered: [],
-          availability: {
-            Monday: { start: '09:00', end: '17:00', isAvailable: true },
-            Tuesday: { start: '09:00', end: '17:00', isAvailable: true },
-            Wednesday: { start: '09:00', end: '17:00', isAvailable: true },
-            Thursday: { start: '09:00', end: '17:00', isAvailable: true },
-            Friday: { start: '09:00', end: '17:00', isAvailable: true },
-            Saturday: { start: '10:00', end: '15:00', isAvailable: false },
-            Sunday: { start: '10:00', end: '15:00', isAvailable: false }
-          }
-        });
-      }
-
-      // Login the user
-      req.login(user, (err) => {
-        if (err) return next(err);
-        // Return sanitized user object (without password)
-        const { password, ...userWithoutPassword } = user;
-        res.status(201).json({ user: userWithoutPassword });
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      next(error);
-    }
+  // Authentication routes - Direct registration is disabled
+  // Users must go through OTP verification (see verificationController.ts)
+  app.post("/api/register", async (req, res) => {
+    return res.status(400).json({ 
+      message: "Direct registration is disabled. Please use OTP verification flow.",
+      redirect: "/register"
+    });
   });
 
   app.post("/api/login", (req, res, next) => {

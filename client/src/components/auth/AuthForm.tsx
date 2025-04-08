@@ -21,7 +21,7 @@ interface AuthFormProps {
 export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { loginMutation, registerMutation } = useAuth();
+  const { loginMutation } = useAuth();
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [isRequestingOTP, setIsRequestingOTP] = useState(false);
   const [tempUserId, setTempUserId] = useState<number | null>(null);
@@ -155,7 +155,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     }
   };
 
-  const isLoading = loginMutation.isPending || registerMutation.isPending || isRequestingOTP;
+  const isLoading = loginMutation.isPending || isRequestingOTP;
 
   // If showing OTP verification, render that component instead of the form
   if (showOTPVerification && tempUserId && registrationData) {
