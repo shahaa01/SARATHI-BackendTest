@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 import { z } from 'zod';
 import { insertUserSchema } from '@shared/schema';
+import { generateToken, getExpiryDate } from '../utils/tokenUtil';
+import { sendVerificationEmail } from '../services/emailService';
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'sarathi_secret_key';
@@ -52,10 +54,17 @@ export const register = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userData.password, salt);
     
+    // Generate verification token
+    const verificationToken = generateToken();
+    const verificationTokenExpiry = getExpiryDate(24); // 24 hours expiry
+    
     // Create user
     const user = await storage.createUser({
       ...userData,
-      password: hashedPassword
+      password: hashedPassword,
+      verificationToken,
+      verificationTokenExpiry,
+      isVerified: false
     });
     
     // Create service provider profile if role is provider
@@ -76,6 +85,14 @@ export const register = async (req: Request, res: Response) => {
           Sunday: { start: '10:00', end: '15:00', isAvailable: false }
         }
       });
+    }
+    
+    // Send verification email
+    try {
+      await sendVerificationEmail(user.email, verificationToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // We continue with registration even if email sending fails
     }
     
     // Generate JWT token
@@ -130,6 +147,14 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
+    // Check if user email is verified
+    if (!user.isVerified) {
+      return res.status(403).json({ 
+        message: 'Please verify your email before logging in',
+        needsVerification: true 
+      });
+    }
+    
     // Generate JWT token
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '7d' });
     
@@ -171,6 +196,11 @@ export const logout = (req: Request, res: Response) => {
 // Get current user
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
+    // Check if user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
     const user = req.user;
     
     // Return user info
@@ -182,7 +212,8 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl
+        profileImageUrl: user.profileImageUrl,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {

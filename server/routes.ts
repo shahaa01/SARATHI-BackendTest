@@ -10,6 +10,7 @@ import * as bookingController from "./controllers/bookingController";
 import * as userController from "./controllers/userController";
 import * as serviceController from "./controllers/serviceController";
 import * as reviewController from "./controllers/reviewController";
+import * as verificationController from "./controllers/verificationController";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add cookie parser middleware
@@ -54,6 +55,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/availability/days-off/:id", authMiddleware, userController.removeDayOff);
   app.post("/api/availability/copy-week", authMiddleware, userController.copyWeekSchedule);
   app.post("/api/availability/unavailable-week", authMiddleware, userController.markWeekUnavailable);
+
+  // Verification routes
+  app.get("/api/verify-email", verificationController.verifyEmail);
+  app.post("/api/send-verification", verificationController.sendVerification);
+  app.post("/api/reset-password/request", verificationController.requestPasswordReset);
+  app.post("/api/reset-password", verificationController.resetPassword);
 
   const httpServer = createServer(app);
 

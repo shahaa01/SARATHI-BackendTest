@@ -15,13 +15,31 @@ export const users = pgTable("users", {
   address: text("address"),
   city: text("city").default("Kathmandu"),
   profileImageUrl: text("profile_image_url"),
+  isVerified: boolean("is_verified").default(false),
+  verificationToken: text("verification_token"),
+  verificationTokenExpiry: timestamp("verification_token_expiry"),
+  resetPasswordToken: text("reset_password_token"),
+  resetPasswordTokenExpiry: timestamp("reset_password_token_expiry"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Schema for creating a new user
 export const insertUserSchema = createInsertSchema(users)
-  .omit({ id: true, createdAt: true })
-  .partial({ phone: true, address: true, city: true, profileImageUrl: true })
+  .omit({ 
+    id: true, 
+    createdAt: true
+  })
+  .partial({ 
+    phone: true, 
+    address: true, 
+    city: true, 
+    profileImageUrl: true,
+    isVerified: true, 
+    verificationToken: true, 
+    verificationTokenExpiry: true, 
+    resetPasswordToken: true,
+    resetPasswordTokenExpiry: true 
+  })
   .extend({
     confirmPassword: z.string().min(6).optional(),
   });

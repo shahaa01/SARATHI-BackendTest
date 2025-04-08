@@ -30,6 +30,9 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
+  getUserByResetPasswordToken(token: string): Promise<User | undefined>;
+  verifyUser(id: number): Promise<User | undefined>;
   
   // Service Provider Profile methods
   getServiceProviderProfile(userId: number): Promise<ServiceProviderProfile | undefined>;
@@ -135,16 +138,25 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
     const createdAt = new Date();
+    
+    // Extract confirmPassword if it exists in insertUser to avoid including it in User
+    const { confirmPassword, ...userData } = insertUser;
+    
     // Ensure required fields are present
     const user: User = { 
-      ...insertUser, 
+      ...userData, 
       id, 
       createdAt,
-      role: insertUser.role || 'customer', // Default role
-      phone: insertUser.phone || null,
-      address: insertUser.address || null,
-      city: insertUser.city || null,
-      profileImageUrl: insertUser.profileImageUrl || null
+      role: userData.role || 'customer', // Default role
+      phone: userData.phone || null,
+      address: userData.address || null,
+      city: userData.city || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      isVerified: false,
+      verificationToken: null,
+      verificationTokenExpiry: null,
+      resetPasswordToken: null,
+      resetPasswordTokenExpiry: null
     };
     this.users.set(id, user);
     return user;
@@ -155,6 +167,33 @@ export class MemStorage implements IStorage {
     if (!user) return undefined;
     
     const updatedUser = { ...user, ...userData };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.verificationToken === token
+    );
+  }
+
+  async getUserByResetPasswordToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.resetPasswordToken === token
+    );
+  }
+
+  async verifyUser(id: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      isVerified: true,
+      verificationToken: null,
+      verificationTokenExpiry: null
+    };
+    
     this.users.set(id, updatedUser);
     return updatedUser;
   }

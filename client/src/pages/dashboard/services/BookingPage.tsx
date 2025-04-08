@@ -319,13 +319,21 @@ const BookingPage: React.FC = () => {
                         <Calendar
                           mode="single"
                           selected={selectedDate}
-                          onSelect={setSelectedDate}
+                          onSelect={(date) => {
+                            console.log("Date selected:", date);
+                            setSelectedDate(date);
+                          }}
                           disabled={(date) => 
                             date < new Date() || 
                             date > new Date(new Date().setMonth(new Date().getMonth() + 3)) ||
                             !isDateAvailable(date)
                           }
                           className="rounded-md"
+                          styles={{
+                            day: { cursor: 'pointer !important' },
+                            button: { cursor: 'pointer !important' },
+                            cell: { cursor: 'pointer !important' }
+                          }}
                         />
                       </div>
                     </div>

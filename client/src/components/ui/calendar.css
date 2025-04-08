@@ -1,0 +1,41 @@
+.rdp-button {
+  cursor: pointer !important;
+}
+
+.rdp-day {
+  cursor: pointer !important;
+}
+
+.rdp-cell {
+  cursor: pointer !important;
+}
+
+.rdp-table {
+  pointer-events: auto !important;
+}
+
+.rdp-month {
+  pointer-events: auto !important;
+}
+
+/* Add global overrides to make calendar days clickable */
+.rdp {
+  --rdp-cell-size: 40px;
+  margin: 0;
+}
+
+.rdp-months {
+  pointer-events: auto !important;
+}
+
+.rdp-head_cell {
+  font-weight: 600;
+}
+
+.rdp-button:hover:not([disabled]) {
+  background-color: var(--accent);
+}
+
+.rdp-day_selected:hover {
+  background-color: var(--primary) !important;
+}
