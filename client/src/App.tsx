@@ -16,6 +16,7 @@ import CustomerDashboard from "@/pages/dashboard/CustomerDashboard";
 import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
 import BookingList from "@/pages/dashboard/bookings/BookingList";
 import Reviews from "@/pages/dashboard/reviews/Reviews";
+import Settings from "@/pages/dashboard/settings/Settings";
 import Services from "@/pages/dashboard/provider/Services";
 import Availability from "@/pages/dashboard/provider/Availability";
 
@@ -35,6 +36,7 @@ function Router() {
       {/* Shared Dashboard Routes */}
       <ProtectedRoute path="/dashboard/bookings" component={BookingList} />
       <ProtectedRoute path="/dashboard/reviews" component={Reviews} />
+      <ProtectedRoute path="/dashboard/settings" component={Settings} />
       
       {/* Provider-specific Routes */}
       <ProtectedRoute path="/dashboard/services" component={Services} requiredRole="provider" />

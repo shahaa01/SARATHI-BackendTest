@@ -63,6 +63,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { path: '/dashboard/availability', label: 'Availability', icon: <Clock className="h-5 w-5 mr-3" /> },
     { path: '/dashboard/reviews', label: 'Reviews', icon: <Star className="h-5 w-5 mr-3" /> },
     { path: '/dashboard/services', label: 'Services & Rates', icon: <Bolt className="h-5 w-5 mr-3" /> },
+    { path: '/dashboard/settings', label: 'Settings', icon: <Settings className="h-5 w-5 mr-3" /> },
   ];
 
   const navItems = user?.role === 'provider' ? providerNavItems : customerNavItems;
@@ -73,7 +74,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <aside className="bg-white shadow-lg z-20 w-full md:w-64 md:min-h-screen md:fixed hidden md:block">
         <div className="p-4 flex justify-center md:justify-start items-center border-b border-gray-100">
           <Link href="/dashboard">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent cursor-pointer">
+            <h1 className="text-2xl font-bold text-primary cursor-pointer">
               Sarathi
             </h1>
           </Link>
@@ -92,12 +93,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 href={item.path}
                 className={`flex items-center px-4 py-3 rounded-lg ${
                   isActive(item.path)
-                    ? 'bg-primary bg-opacity-10 text-primary'
+                    ? 'bg-primary/10 text-primary font-medium'
                     : 'text-gray-700 hover:bg-gray-100 transition-all'
                 }`}
               >
                 {item.icon}
-                {item.label}
+                <span>{item.label}</span>
               </Link>
             ))}
           </div>
@@ -160,7 +161,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="mr-2">
                 <Menu className="h-6 w-6 text-gray-700" />
               </button>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-primary">
                 Sarathi
               </h1>
             </div>
@@ -210,12 +211,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     href={item.path}
                     className={`flex items-center px-4 py-3 rounded-lg mb-2 ${
                       isActive(item.path)
-                        ? 'bg-primary bg-opacity-10 text-primary'
+                        ? 'bg-primary/10 text-primary font-medium'
                         : 'text-gray-700 hover:bg-gray-100 transition-all'
                     }`}
                   >
                     {item.icon}
-                    {item.label}
+                    <span>{item.label}</span>
                   </Link>
                 ))}
                 <div className="mt-4 pt-4 border-t border-gray-100">
@@ -240,7 +241,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <div className="container mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="mb-4 md:mb-0">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Sarathi</h1>
+                <h1 className="text-xl font-bold text-primary">Sarathi</h1>
                 <p className="text-sm text-gray-500 mt-1">Your Trusted Service Partner</p>
               </div>
               

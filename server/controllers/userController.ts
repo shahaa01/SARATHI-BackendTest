@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { z } from 'zod';
+import { hashPassword, comparePasswords } from '../auth';
 
 // Get dashboard data for customer
 export const getCustomerDashboard = async (req: Request, res: Response) => {
@@ -470,3 +471,131 @@ function getIconName(serviceName: string): string {
   
   return iconMap[serviceName] || 'ToolIcon';
 }
+
+// Get user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    
+    if (req.user?.id !== userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized access to user data' });
+    }
+    
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    
+    if (req.user?.id !== userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized access to update user data' });
+    }
+    
+    // Validate request body
+    const profileSchema = z.object({
+      firstName: z.string().min(2, 'First name must be at least 2 characters'),
+      lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+      email: z.string().email('Please enter a valid email address'),
+      phone: z.string().optional(),
+      address: z.string().optional(),
+      city: z.string().optional(),
+      profileImageUrl: z.string().url().optional().or(z.literal('')),
+    });
+    
+    const validationResult = profileSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: validationResult.error.errors
+      });
+    }
+    
+    const updateData = validationResult.data;
+    
+    // Check if email already exists for different user
+    if (updateData.email) {
+      const existingUser = await storage.getUserByEmail(updateData.email);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ message: 'Email is already in use' });
+      }
+    }
+    
+    const updatedUser = await storage.updateUser(userId, updateData);
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Update user profile error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update user password
+export const updatePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    
+    if (req.user?.id !== userId && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized access to update password' });
+    }
+    
+    // Validate request body
+    const passwordSchema = z.object({
+      currentPassword: z.string().min(6, 'Current password is required'),
+      newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+      confirmPassword: z.string().min(6, 'Please confirm your password'),
+    }).refine((data) => data.newPassword === data.confirmPassword, {
+      message: "Passwords don't match",
+      path: ['confirmPassword'],
+    });
+    
+    const validationResult = passwordSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: validationResult.error.errors
+      });
+    }
+    
+    const { currentPassword, newPassword } = validationResult.data;
+    
+    // Get user
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Verify current password using comparePasswords from auth module
+    const isPasswordValid = await comparePasswords(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+    
+    // Update password with hashed password
+    const hashedPassword = await hashPassword(newPassword);
+    const updatedUser = await storage.updateUser(userId, { password: hashedPassword });
+    if (!updatedUser) {
+      return res.status(500).json({ message: 'Failed to update password' });
+    }
+    
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Update password error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};

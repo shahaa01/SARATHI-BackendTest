@@ -18,6 +18,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
 
+  // User routes
+  app.get('/api/users/:id', authMiddleware, userController.getUserById);
+  app.patch('/api/users/:id', authMiddleware, userController.updateUserProfile);
+  app.patch('/api/users/:id/password', authMiddleware, userController.updatePassword);
+
   // Dashboard routes
   app.get("/api/dashboard/customer", authMiddleware, userController.getCustomerDashboard);
   app.get("/api/dashboard/provider", authMiddleware, userController.getProviderDashboard);
