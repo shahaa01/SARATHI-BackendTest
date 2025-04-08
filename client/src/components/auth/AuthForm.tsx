@@ -50,66 +50,74 @@ export const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     mode: 'onChange', // Validate field on change
   });
 
-  // Handle form submission with type-safe handling
+  // Handle form submission with more robust error handling
   const onSubmit = async (values: LoginFormValues | RegisterFormValues) => {
-    try {
-      if (type === 'login') {
-        // Safe to cast to LoginFormValues when in login mode
-        const loginValues = values as LoginFormValues;
-        
+    // No outer try/catch - handle errors in each specific form submission block
+    if (type === 'login') {
+      // Safe to cast to LoginFormValues when in login mode
+      const loginValues = values as LoginFormValues;
+      
+      try {
         // Just pass username and password for login
-        await loginMutation.mutateAsync({
+        const result = await loginMutation.mutateAsync({
           username: loginValues.username,
           password: loginValues.password
         });
-        setLocation('/dashboard');
-      } else {
-        // Safe to cast to RegisterFormValues when in register mode
-        const registerValues = values as RegisterFormValues;
-        
-        // For debugging - log registration data
-        console.log("Registration data:", registerValues);
-        
-        // Convert form values to the expected format for registration
-        const registerData = {
-          username: registerValues.username,
-          password: registerValues.password,
-          email: registerValues.email,
-          firstName: registerValues.firstName, 
-          lastName: registerValues.lastName,
-          role: registerValues.role || 'customer',
-          // Optional fields - pass as empty string if null/undefined
-          phone: registerValues.phone || '',
-          address: registerValues.address || '',
-          city: registerValues.city || 'Kathmandu',
-          profileImageUrl: '',
-          confirmPassword: registerValues.confirmPassword
-        };
-        
-        try {
-          await registerMutation.mutateAsync(registerData);
+        // Only redirect on success
+        if (result) {
+          setLocation('/dashboard');
+        }
+      } catch (error) {
+        // Display login-specific error
+        toast({
+          title: "Login failed",
+          description: error instanceof Error ? error.message : "Invalid username or password",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Safe to cast to RegisterFormValues when in register mode
+      const registerValues = values as RegisterFormValues;
+      
+      // For debugging - log registration data
+      console.log("Registration data:", registerValues);
+      
+      // Convert form values to the expected format for registration
+      const registerData = {
+        username: registerValues.username,
+        password: registerValues.password,
+        email: registerValues.email,
+        firstName: registerValues.firstName, 
+        lastName: registerValues.lastName,
+        role: registerValues.role || 'customer',
+        // Optional fields - pass as empty string if null/undefined
+        phone: registerValues.phone || '',
+        address: registerValues.address || '',
+        city: registerValues.city || 'Kathmandu',
+        profileImageUrl: '',
+        confirmPassword: registerValues.confirmPassword
+      };
+      
+      try {
+        // Set a flag to indicate that registration is in progress, but don't reset the form
+        const result = await registerMutation.mutateAsync(registerData);
+        // Only toast and redirect if we successfully registered
+        if (result) {
           toast({
             title: "Registration successful",
             description: "Welcome to Sarathi!"
           });
           // Only redirect on success
           setLocation('/dashboard');
-        } catch (error) {
-          // On error, form values are preserved, don't reset the form
-          toast({
-            title: "Registration failed",
-            description: error instanceof Error ? error.message : "An unknown error occurred",
-            variant: "destructive",
-          });
         }
+      } catch (error) {
+        // On error, form values are preserved, don't reset the form
+        toast({
+          title: "Registration failed",
+          description: error instanceof Error ? error.message : "An unknown error occurred",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      // This catch block is for login errors or unexpected issues
-      toast({
-        title: type === 'login' ? "Login failed" : "Registration error",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
     }
   };
 
