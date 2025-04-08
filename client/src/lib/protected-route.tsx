@@ -4,30 +4,38 @@ import { Redirect, Route } from "wouter";
 
 export function ProtectedRoute({
   path,
-  component: Component,
+  component,
+  requiredRole
 }: {
   path: string;
-  component: () => React.JSX.Element;
+  component: React.ComponentType;
+  requiredRole?: 'customer' | 'provider' | null;
 }) {
   const { user, isLoading } = useAuth();
+  const Component = component;
 
-  if (isLoading) {
-    return (
-      <Route path={path}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-border" />
-        </div>
-      </Route>
-    );
-  }
+  return (
+    <Route
+      path={path}
+      component={() => {
+        if (isLoading) {
+          return (
+            <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="h-8 w-8 animate-spin text-border" />
+            </div>
+          );
+        }
 
-  if (!user) {
-    return (
-      <Route path={path}>
-        <Redirect to="/auth" />
-      </Route>
-    );
-  }
+        if (!user) {
+          return <Redirect to="/auth" />;
+        }
 
-  return <Route path={path} component={Component} />;
+        if (requiredRole && user.role !== requiredRole) {
+          return <Redirect to="/dashboard" />;
+        }
+
+        return <Component />;
+      }}
+    />
+  );
 }

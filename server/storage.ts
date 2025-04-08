@@ -135,7 +135,17 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
     const createdAt = new Date();
-    const user: User = { ...insertUser, id, createdAt };
+    // Ensure required fields are present
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      createdAt,
+      role: insertUser.role || 'customer', // Default role
+      phone: insertUser.phone || null,
+      address: insertUser.address || null,
+      city: insertUser.city || null,
+      profileImageUrl: insertUser.profileImageUrl || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -159,7 +169,20 @@ export class MemStorage implements IStorage {
   async createServiceProviderProfile(profile: InsertServiceProviderProfile): Promise<ServiceProviderProfile> {
     const id = this.profileCurrentId++;
     const createdAt = new Date();
-    const serviceProviderProfile: ServiceProviderProfile = { ...profile, id, createdAt };
+    const serviceProviderProfile: ServiceProviderProfile = { 
+      ...profile, 
+      id, 
+      createdAt, 
+      bio: profile.bio || null,
+      experience: profile.experience || null,
+      hourlyRate: profile.hourlyRate || null,
+      servicesOffered: profile.servicesOffered || [],
+      availability: profile.availability || {},
+      isVerified: false, 
+      totalJobs: 0, 
+      totalEarnings: 0, 
+      avgRating: 0
+    };
     this.serviceProviderProfiles.set(id, serviceProviderProfile);
     return serviceProviderProfile;
   }
@@ -188,7 +211,14 @@ export class MemStorage implements IStorage {
   async createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory> {
     const id = this.categoryCurrentId++;
     const createdAt = new Date();
-    const serviceCategory: ServiceCategory = { ...category, id, createdAt };
+    const serviceCategory: ServiceCategory = { 
+      ...category, 
+      id, 
+      createdAt,
+      description: category.description || null,
+      imageUrl: category.imageUrl || null,
+      basePrice: category.basePrice || null
+    };
     this.serviceCategories.set(id, serviceCategory);
     return serviceCategory;
   }
@@ -217,7 +247,16 @@ export class MemStorage implements IStorage {
   async createBooking(booking: InsertBooking): Promise<Booking> {
     const id = this.bookingCurrentId++;
     const createdAt = new Date();
-    const newBooking: Booking = { ...booking, id, createdAt };
+    const newBooking: Booking = { 
+      ...booking, 
+      id, 
+      createdAt,
+      status: booking.status || 'pending',
+      description: booking.description || null,
+      location: booking.location || null,
+      price: booking.price || null,
+      completedDate: null
+    };
     this.bookings.set(id, newBooking);
     return newBooking;
   }
@@ -257,7 +296,12 @@ export class MemStorage implements IStorage {
   async createReview(review: InsertReview): Promise<Review> {
     const id = this.reviewCurrentId++;
     const createdAt = new Date();
-    const newReview: Review = { ...review, id, createdAt };
+    const newReview: Review = { 
+      ...review, 
+      id, 
+      createdAt,
+      comment: review.comment || null
+    };
     this.reviews.set(id, newReview);
     return newReview;
   }

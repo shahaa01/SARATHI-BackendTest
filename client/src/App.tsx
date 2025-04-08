@@ -27,21 +27,21 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       
       {/* Customer Dashboard Routes */}
-      <ProtectedRoute path="/dashboard" component={CustomerDashboard} />
+      <ProtectedRoute path="/dashboard" component={CustomerDashboard} requiredRole="customer" />
       
       {/* Provider Dashboard Routes */}
-      <ProtectedRoute path="/dashboard/provider" component={ProviderDashboard} />
+      <ProtectedRoute path="/dashboard/provider" component={ProviderDashboard} requiredRole="provider" />
       
       {/* Shared Dashboard Routes */}
       <ProtectedRoute path="/dashboard/bookings" component={BookingList} />
       <ProtectedRoute path="/dashboard/reviews" component={Reviews} />
       
       {/* Provider-specific Routes */}
-      <ProtectedRoute path="/dashboard/services" component={Services} />
-      <ProtectedRoute path="/dashboard/availability" component={Availability} />
+      <ProtectedRoute path="/dashboard/services" component={Services} requiredRole="provider" />
+      <ProtectedRoute path="/dashboard/availability" component={Availability} requiredRole="provider" />
       
       {/* Fallback to 404 */}
-      <Route component={NotFound} />
+      <Route path="*" component={NotFound} />
     </Switch>
   );
 }

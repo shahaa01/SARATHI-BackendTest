@@ -55,7 +55,7 @@ interface ServiceCategory {
 const Services: React.FC = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
 
   // State for service forms
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);

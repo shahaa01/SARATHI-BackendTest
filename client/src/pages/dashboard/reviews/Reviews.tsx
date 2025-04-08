@@ -2,13 +2,13 @@ import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCurrentUser } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Star, MessageSquare, Calendar, CheckCircle, User } from 'lucide-react';
 
 const Reviews: React.FC = () => {
-  const { data: user } = useCurrentUser();
+  const { user } = useAuth();
   
   // Fetch reviews based on user role
   const { data: reviewsData, isLoading } = useQuery({
