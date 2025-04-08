@@ -1,0 +1,111 @@
+I'm building a full-stack web platform called Sarathi — a modern, sleek, and responsive service marketplace for the people of Kathmandu. It connects households with verified, local service providers (e.g., plumber, tailor, cook, driver, etc.).
+
+The frontend (React) is mostly complete, including:
+
+Homepage
+
+Apply as a provider form
+
+Service listing sections
+
+Basic static pages
+
+Now I need your help to develop the backend using the MERN stack and also build dashboards for both customers and service providers.
+
+🧠 Project Stack:
+Frontend: React.js (already built)
+
+Backend: Node.js + Express
+
+Database: MongoDB (use Mongoose)
+
+Authentication: JWT-based auth
+
+Hosting-ready code (keep modular)
+
+🔧 Backend Requirements:
+Authentication System:
+
+Separate signup/login for:
+
+Customers
+
+Service Providers
+
+JWT Auth + bcrypt for hashing
+
+Middleware for role-based access
+
+MongoDB Models:
+
+User (with role: customer/provider)
+
+Booking (with status: pending, accepted, completed)
+
+ServiceProviderProfile
+
+Reviews
+
+ServiceCategories
+
+BusinessSubmissions (for youth entrepreneurs)
+
+APIs / Routes:
+
+bash
+Copy
+Edit
+POST   /api/auth/register (customer or provider)
+POST   /api/auth/login
+GET    /api/services
+POST   /api/bookings
+GET    /api/dashboard/customer
+GET    /api/dashboard/provider
+POST   /api/business-submission
+Error handling & validation for all user inputs.
+
+📊 Dashboard UI Requirements:
+🔷 For Customers:
+View current + past bookings
+
+Cancel/reschedule requests
+
+Leave reviews
+
+View submitted service requests
+
+Visually clean & mobile responsive
+
+🔶 For Service Providers:
+View all bookings (status-based filter)
+
+Set availability
+
+Update service categories and rates
+
+View reviews + average ratings
+
+Visual analytics: earnings, jobs done
+
+🎨 UI/UX Expectations:
+Clean, aesthetic, modern design
+
+Match styling with existing React frontend
+
+Use cards, hover effects, micro-animations
+
+Fully responsive for 320px, 375px, and 425px mobile widths
+
+Keep animations subtle and smooth
+
+Use placeholder images or relative image paths, which I will later replace
+
+⚠️ Important Notes:
+Don't rewrite or affect existing frontend components
+
+Add only the required backend logic + dashboard UI components
+
+Keep folder structure modular: controllers/, routes/, models/, middleware/, config/
+
+Use .env for sensitive keys and config
+
