@@ -1,49 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
 import { storage } from '../storage';
 
-// Extended Request interface to include user property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
+// Middleware to check if user is authenticated (using Passport sessions)
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  // Check if user is authenticated using Passport
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Authentication required' });
   }
-}
 
-// Secret key for JWT
-const JWT_SECRET = process.env.JWT_SECRET || 'sarathi_secret_key';
-
-// Middleware to authenticate JWT token
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Get token from cookies or Authorization header
-    const token = req.cookies?.token || 
-                 (req.headers.authorization?.startsWith('Bearer ') && 
-                  req.headers.authorization.split(' ')[1]);
-
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-    
-    // Get user from storage
-    const user = await storage.getUser(decoded.id);
-    
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
-
-    // Attach user to request
-    req.user = user;
-    
-    next();
-  } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(401).json({ message: 'Invalid token' });
-  }
+  // User is authenticated
+  next();
 };
 
 // Middleware to check if user has the required role
