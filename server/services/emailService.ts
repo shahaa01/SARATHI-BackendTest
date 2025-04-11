@@ -13,7 +13,7 @@ if (sendgridApiKey) {
 
 const FROM_EMAIL = 'sarathisewa2081@gmail.com';
 const APP_NAME = 'Sarathi';
-const BASE_URL = process.env.APP_URL || 'http://localhost:3000';
+const BASE_URL = process.env.APP_URL || 'http://localhost:3005';
 
 /**
  * Interface for email options

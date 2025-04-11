@@ -1,70 +1,56 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
-import { ThemeProvider } from "@/components/ui/ThemeProvider";
-import { AuthProvider } from "@/lib/auth";
-import { ProtectedRoute } from "@/lib/protected-route";
+import React from 'react';
+import { Route, Switch, useLocation } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
+import HomePage from '@/pages/HomePage';
+import AuthPage from '@/pages/auth/AuthPage';
+import Dashboard from '@/pages/dashboard/Dashboard';
+import ProviderDashboard from '@/pages/dashboard/provider/ProviderDashboard';
+import ServiceDetail from '@/pages/services/ServiceDetail';
+import ProviderProfile from '@/pages/profile/ProviderProfile';
+import NotFound from '@/pages/NotFound';
 
-// Auth Pages
-import AuthPage from "@/pages/auth";
-import UserChoice from "@/pages/landing/UserChoice";
+const ProtectedRoute: React.FC<{ path: string; component: React.ComponentType; allowedRoles?: string[] }> = ({
+    path,
+    component: Component,
+    allowedRoles,
+}) => {
+    const { isAuthenticated, user } = useAuth();
+    const [, setLocation] = useLocation();
 
-// Dashboard Pages
-import CustomerDashboard from "@/pages/dashboard/CustomerDashboard";
-import ProviderDashboard from "@/pages/dashboard/ProviderDashboard";
-import BookingList from "@/pages/dashboard/bookings/BookingList";
-import Reviews from "@/pages/dashboard/reviews/Reviews";
-import Settings from "@/pages/dashboard/settings/Settings";
-import Services from "@/pages/dashboard/provider/Services";
-import Availability from "@/pages/dashboard/provider/Availability";
-import ServicesPage from "@/pages/dashboard/services/ServicesPage";
-import BookingPage from "@/pages/dashboard/services/BookingPage";
+    if (!isAuthenticated) {
+        setLocation('/auth');
+        return null;
+    }
 
-function Router() {
-  return (
-    <Switch>
-      {/* Public Routes */}
-      <Route path="/" component={UserChoice} />
-      <Route path="/auth" component={AuthPage} />
-      
-      {/* Customer Dashboard Routes */}
-      <ProtectedRoute path="/dashboard" component={CustomerDashboard} requiredRole="customer" />
-      
-      {/* Provider Dashboard Routes */}
-      <ProtectedRoute path="/dashboard/provider" component={ProviderDashboard} requiredRole="provider" />
-      
-      {/* Shared Dashboard Routes */}
-      <ProtectedRoute path="/dashboard/bookings" component={BookingList} />
-      <ProtectedRoute path="/dashboard/reviews" component={Reviews} />
-      <ProtectedRoute path="/dashboard/settings" component={Settings} />
-      
-      {/* Provider-specific Routes */}
-      <ProtectedRoute path="/dashboard/provider/services" component={Services} requiredRole="provider" />
-      <ProtectedRoute path="/dashboard/availability" component={Availability} requiredRole="provider" />
-      
-      {/* Customer Service Routes */}
-      <ProtectedRoute path="/dashboard/services" component={ServicesPage} requiredRole="customer" />
-      <ProtectedRoute path="/dashboard/services/book" component={BookingPage} requiredRole="customer" />
-      
-      {/* Fallback to 404 */}
-      <Route path="*" component={NotFound} />
-    </Switch>
-  );
-}
+    if (allowedRoles && !allowedRoles.includes(user?.role || '')) {
+        setLocation('/auth');
+        return null;
+    }
 
-function App() {
-  return (
-    <ThemeProvider attribute="class" defaultTheme="light">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Router />
-          <Toaster />
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
-}
+    return <Component />;
+};
+
+const App: React.FC = () => {
+    return (
+        <Switch>
+            {/* Public routes */}
+            <Route path="/" component={HomePage} />
+            <Route path="/auth" component={AuthPage} />
+            <Route path="/services/:serviceId" component={ServiceDetail} />
+            <Route path="/providers/:providerId" component={ProviderProfile} />
+
+            {/* Protected routes */}
+            <Route path="/dashboard">
+                <ProtectedRoute path="/dashboard" component={Dashboard} allowedRoles={['customer']} />
+            </Route>
+            <Route path="/dashboard/provider">
+                <ProtectedRoute path="/dashboard/provider" component={ProviderDashboard} allowedRoles={['provider']} />
+            </Route>
+
+            {/* 404 route */}
+            <Route component={NotFound} />
+        </Switch>
+    );
+};
 
 export default App;

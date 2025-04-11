@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Redirect, useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,8 +21,9 @@ import { Loader2 } from "lucide-react";
 import OTPVerification from "@/components/auth/OTPVerification";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import '@/styles/pages/auth/AuthPage.scss';
 
-const AuthPage = () => {
+const AuthPage: React.FC = () => {
   const { user, isLoading, loginMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [location, setLocation] = useLocation();
@@ -59,6 +60,29 @@ const AuthPage = () => {
   if (user) {
     return <Redirect to="/dashboard" />;
   }
+
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<'customer' | 'provider'>('customer');
+  const [error, setError] = useState('');
+  const { login: authLogin, register: authRegister } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      if (isLogin) {
+        await authLogin(email, password);
+      } else {
+        await authRegister({ email, password, name, role });
+      }
+    } catch (err) {
+      setError('Authentication failed. Please try again.');
+    }
+  };
 
   const LoginForm = () => {
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -341,80 +365,88 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left side - Login/Register/OTP Forms */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
-        {showOTPVerification && tempUserId && registrationData ? (
-          <OTPVerification
-            email={registrationData.email}
-            tempUserId={tempUserId}
-            userData={registrationData}
-            onVerificationSuccess={handleVerificationSuccess}
-            onBack={handleBackToRegistration}
-          />
-        ) : (
-          <Card className="w-full max-w-md p-8">
-            <Tabs defaultValue="login" onValueChange={(value) => setActiveTab(value as "login" | "register")}>
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <div className="space-y-4">
-                  <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Welcome Back</h1>
-                    <p className="text-muted-foreground">Sign in to access your Sarathi account</p>
-                  </div>
-                  <LoginForm />
-                </div>
-              </TabsContent>
-              <TabsContent value="register">
-                <div className="space-y-4">
-                  <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold">Create Your Account</h1>
-                    <p className="text-muted-foreground">Join Sarathi to connect with service providers</p>
-                  </div>
-                  <RegisterForm />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </Card>
-        )}
-      </div>
+    <div className="auth-page">
+      <div className="auth-container">
+        <h1>{isLogin ? 'Login' : 'Register'}</h1>
+        
+        {error && <div className="error-message">{error}</div>}
 
-      {/* Right side - Hero Section */}
-      <div className="hidden md:w-1/2 md:flex bg-primary/10 p-8 flex-col justify-center items-center space-y-6">
-        <div className="max-w-md text-center">
-          <h1 className="text-4xl font-bold mb-4">Sarathi</h1>
-          <p className="text-xl mb-6">
-            Connecting households with verified local service providers in Kathmandu
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="bg-primary/20 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+        <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <>
+              <div className="form-group">
+                <label htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </div>
-              <span>Verified service providers</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="bg-primary/20 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
+              <div className="form-group">
+                <label>Role</label>
+                <div className="role-selector">
+                  <Button
+                    variant={role === 'customer' ? 'primary' : 'outline'}
+                    size="medium"
+                    onClick={() => setRole('customer')}
+                    type="button"
+                  >
+                    Customer
+                  </Button>
+                  <Button
+                    variant={role === 'provider' ? 'primary' : 'outline'}
+                    size="medium"
+                    onClick={() => setRole('provider')}
+                    type="button"
+                  >
+                    Provider
+                  </Button>
+                </div>
               </div>
-              <span>Book services when you need them</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="bg-primary/20 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <span>Manage your bookings easily</span>
-            </div>
+            </>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button variant="primary" size="large" fullWidth type="submit">
+            {isLogin ? 'Login' : 'Register'}
+          </Button>
+        </form>
+
+        <div className="auth-toggle">
+          <p>
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => setIsLogin(!isLogin)}
+            >
+              {isLogin ? 'Register' : 'Login'}
+            </Button>
+          </p>
         </div>
       </div>
     </div>

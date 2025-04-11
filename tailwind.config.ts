@@ -2,9 +2,16 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{css,scss}"
+  ],
   theme: {
     extend: {
+      borderWidth: {
+        DEFAULT: '1px',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -61,6 +68,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      backgroundColor: {
+        DEFAULT: "hsl(var(--background))",
+      },
+      textColor: {
+        DEFAULT: "hsl(var(--foreground))",
       },
       keyframes: {
         "accordion-down": {

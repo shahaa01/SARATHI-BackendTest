@@ -1,0 +1,82 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    outline: none;
+
+    // Variants
+    &-primary {
+        background-color: var(--primary-color);
+        color: white;
+
+        &:hover:not(:disabled) {
+            background-color: var(--primary-color-dark);
+        }
+    }
+
+    &-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+
+        &:hover:not(:disabled) {
+            background-color: var(--secondary-color-dark);
+        }
+    }
+
+    &-outline {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+
+        &:hover:not(:disabled) {
+            background-color: var(--primary-color-light);
+        }
+    }
+
+    &-text {
+        background-color: transparent;
+        color: var(--primary-color);
+        padding: 0;
+
+        &:hover:not(:disabled) {
+            text-decoration: underline;
+        }
+    }
+
+    // Sizes
+    &-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    &-medium {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    &-large {
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+    }
+
+    // States
+    &-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &-full-width {
+        width: 100%;
+    }
+
+    // Focus state
+    &:focus {
+        box-shadow: 0 0 0 2px var(--primary-color-light);
+    }
+} 
